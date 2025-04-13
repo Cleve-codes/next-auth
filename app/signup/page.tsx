@@ -74,15 +74,17 @@ export default function SignupPage() {
       if (response.ok) {
         toast.success('Account created successfully! Redirecting to login...')
         router.push('/login')
-      } else {
-        // Check for specific error messages
-        if (result.message?.toLowerCase().includes('user already exists')) {
-          toast.error(result.message)
-        } else if (result.message?.toLowerCase().includes('password must be')) {
-          toast.error(result.message)
+      } else if (response.status === 409) {
+        toast.error('User already exists. Try logging in instead.')
+      } else if (response.status === 400) {
+        const result = await response.json()
+        if (result.error?.toLowerCase().includes('password must be')) {
+          toast.error(result.error)
         } else {
           toast.error('Failed to create account. Please try again.')
         }
+      } else {
+        toast.error('Failed to create account. Please try again.')
       }
     } catch (error) {
       toast.error('An unexpected error occurred while creating your account')
